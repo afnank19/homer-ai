@@ -1,0 +1,103 @@
+/*
+ */
+
+const GROQ_KEY = import.meta.env.VITE_GROQ_KEY as string;
+
+// const url = "https://openrouter.ai/api/v1/chat/completions";
+const url = "https://api.groq.com/openai/v1/chat/completions";
+const headers = {
+  Authorization: `Bearer ${GROQ_KEY}`,
+  "Content-Type": "application/json",
+};
+
+const MODEL = "deepseek/deepseek-r1:free";
+
+export const getNextLine = async (userContext: string | undefined) => {
+  const payload = {
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are an advanced language model that specializes in predicting natural next-line continuations for written text. When given a passage, your task is to generate only the next most plausible single line, continuing the context in a coherent, contextually appropriate, and stylistically consistent way. Respond with exactly one line that would logically follow the input. If the structure or content implies that the next line should be part of a list, code block, table, or other structured format, you must use valid Markdown to express it. Do not summarize, explain, or generate multiple lines. Just output the next line as it would naturally appear.",
+      },
+      {
+        role: "user",
+        content: userContext,
+      },
+    ],
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+
+    const res = await response.json();
+    console.log(res);
+    if (response.status == 429) {
+      throw new Error();
+    }
+
+    //const textFromLLM = "Hi this is a sentence that was hardcoded and im making it extra long to see if it wraps or what bro cuz damn";
+    const textFromLLM: string = res.choices[0].message.content;
+
+    console.log(textFromLLM);
+    // const htmlToBe = "<span>" + textFromLLM + "</span>";
+
+    return textFromLLM;
+  } catch (error) {
+    console.log(error);
+  }
+
+  return "";
+};
+
+export const callLLM = async (userInput: string, context: string) => {
+  const content = "Content: " + context + "\n" + "Instruction: " + userInput;
+
+  console.log("Content: ", content);
+
+  const payload = {
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      {
+        role: "system",
+        content:
+          "ALWAYS RETURN WITH NO MARKDOWN FORMATTING AND ANSWER IN A CONTINUOUS STRING WITHOUT LINEBREAKS. RESPONSE MUST BE VALID JSON. You are a content assistant working with a rich text editor. I will provide you with two inputs: first, the HTML content from the editor (unstyled), and second, an instruction describing what to do with that content. Your job is to apply the instruction to the HTML content and return the updated content. Respond with a JSON object containing two fields: action and html. The action field should describe what kind of modification was made in plain text as coherent sentences with grammar. The html field must contain the full updated HTML content, with your changes applied precisely and preserving the structure. You must use HTML tags for everything like bold, italic, codeblocks, headings etc. If no changes are needed, set action to LOL NO and return the original HTML in html. Only return the JSON object—no headings, no formatting explanations, no commentary. Just return the JSON as a string, do not put markdown formatting on it like backticks. DO NOT MENTION YOU ARE MODIFYING THE HTML CONTENT, JUST REFER TO TEXT",
+      },
+      {
+        role: "user",
+        content: content,
+      },
+    ],
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload),
+    });
+
+    const res = await response.json();
+    console.log(res);
+    if (response.status == 429) {
+      throw new Error();
+    }
+
+    //const textFromLLM = "Hi this is a sentence that was hardcoded and im making it extra long to see if it wraps or what bro cuz damn";
+    const textFromLLM: string = res.choices[0].message.content;
+
+    console.log(textFromLLM);
+    // const htmlToBe = "<span>" + textFromLLM + "</span>";
+
+    return textFromLLM;
+  } catch (error) {
+    console.log(error);
+  }
+
+  return "";
+};

@@ -1,0 +1,39 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Ovo&display=swap");
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #adb5bd;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+.tippy-box {
+  max-width: 42rem !important;
+}
+
+.react-diff-14x8q37 {
+  display: none;
+}
+
+html,
+body {
+  @apply bg-[#faf9f5];
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-optical-sizing: auto;
+}
+
+.font-bric {
+  font-family: "Bricolage Grotesque", sans-serif;
+  font-optical-sizing: auto;
+}
+
+.font-ovo {
+  font-family: "Ovo", serif;
+  font-weight: 500;
+  font-style: normal;
+  font-size: medium;
+}
