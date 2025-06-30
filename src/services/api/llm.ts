@@ -10,11 +10,11 @@ const headers = {
   "Content-Type": "application/json",
 };
 
-const MODEL = "deepseek/deepseek-r1:free";
+const MODEL = "deepseek-r1-distill-llama-70b";
 
 export const getNextLine = async (userContext: string | undefined) => {
   const payload = {
-    model: "llama-3.3-70b-versatile",
+    model: MODEL,
     messages: [
       {
         role: "system",
@@ -61,7 +61,7 @@ export const callLLM = async (userInput: string, context: string) => {
   console.log("Content: ", content);
 
   const payload = {
-    model: "llama-3.3-70b-versatile",
+    model: MODEL,
     messages: [
       {
         role: "system",
@@ -73,6 +73,9 @@ export const callLLM = async (userInput: string, context: string) => {
         content: content,
       },
     ],
+    response_format: {
+      type: "json_object",
+    },
   };
 
   try {
