@@ -2,6 +2,9 @@ import { useState, type Dispatch, type SetStateAction } from "react";
 import Message from "../ui/message";
 import { callLLM } from "../../services/api/llm";
 import { PaperPlaneTiltIcon, SparkleIcon } from "@phosphor-icons/react";
+import { useMutation } from "@tanstack/react-query";
+import Thinking from "../ui/thinking";
+import ErrorMsg from "../ui/error-msg";
 
 type ChatProps = {
   editor: any;
@@ -17,6 +20,7 @@ type Message = {
 const Chat = ({ editor, setNewHTML, setOldHTML }: ChatProps) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [lastestMsg, setLatestMsg] = useState<string>("");
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (input === "") {
@@ -25,35 +29,68 @@ const Chat = ({ editor, setNewHTML, setOldHTML }: ChatProps) => {
 
     if (e.key == "Enter" && !e.shiftKey) {
       e.preventDefault();
-      queryLLM();
+      queryLLM(false);
     }
   };
 
-  const queryLLM = async () => {
+  const queryLLM = async (retry: Boolean) => {
     setInput("");
+
+    let message = input;
+    if (retry) {
+      message = lastestMsg;
+    }
+
     const newItem: Message = {
-      message: input,
+      message: message,
       role: "user",
     };
     setMessages((prev) => [...prev, newItem]);
 
-    const content = await callLLM(input, editor.getHTML());
+    const userMessages = messages.filter((msg) => msg.role === "user");
+    const lastThreeMsgs = userMessages.slice(-3);
 
-    const parsedContent = JSON.parse(content);
+    lastThreeMsgs.push(newItem);
 
-    console.log(parsedContent);
-    const llmItem: Message = {
-      message: parsedContent.action,
-      role: "llm",
+    const lastThreeMsgStr = lastThreeMsgs.map((ltm) => {
+      return ltm.message;
+    });
+
+    console.log("last three msgs:", lastThreeMsgStr);
+    const llmInput = {
+      userInput: message,
+      ctx: editor.getHTML(),
+      msgCtx: lastThreeMsgStr,
     };
-    setMessages((prev) => [...prev, llmItem]);
 
-    setOldHTML(editor.getHTML());
-    console.log(editor.getHTML());
-    setNewHTML(parsedContent.html);
-
-    editor?.commands.setContent(parsedContent.html);
+    console.log("Processing Messages");
+    // const content = await callLLM(llmInput);
+    mutation.mutate(llmInput);
   };
+
+  const mutation = useMutation({
+    mutationFn: callLLM,
+    onSuccess: (data) => {
+      const parsedContent = JSON.parse(data);
+
+      console.log(parsedContent);
+      const llmItem: Message = {
+        message: parsedContent.action,
+        role: "llm",
+      };
+      setMessages((prev) => [...prev, llmItem]);
+
+      setOldHTML(editor.getHTML());
+      console.log(editor.getHTML());
+      setNewHTML(parsedContent.html);
+
+      editor?.commands.setContent(parsedContent.html);
+    },
+    onError: (err) => {
+      setLatestMsg(messages[messages.length - 1].message);
+      console.log("woooooo hoo", err);
+    },
+  });
 
   return (
     <div className="flex flex-col h-screen justify-end gap-1">
@@ -65,6 +102,8 @@ const Chat = ({ editor, setNewHTML, setOldHTML }: ChatProps) => {
         {messages.map((msg, i) => {
           return <Message key={i} message={msg.message} role={msg.role} />;
         })}
+        {mutation.isPending ? <Thinking /> : null}
+        {mutation.isError ? <ErrorMsg retryFunc={queryLLM} /> : null}
       </div>
       <div className="flex items-center m-2 mb-0 border rounded-tl rounded-tr border-gray-400 p-2 pb-4 bg-white drop-shadow-lg">
         <input
@@ -78,7 +117,9 @@ const Chat = ({ editor, setNewHTML, setOldHTML }: ChatProps) => {
         ></input>
         <button
           className="bg-[#c96442] cursor-pointer w-fit  p-2 rounded-md hover:bg-[#ff9b79]"
-          onClick={queryLLM}
+          onClick={() => {
+            queryLLM(false);
+          }}
         >
           <PaperPlaneTiltIcon size={"1rem"} color="white" />
         </button>

@@ -4,16 +4,7 @@ import { getNextLine } from "../../services/api/llm";
 import Diff from "../diff/diff";
 import { Editor as EditorType } from "@tiptap/core";
 import { SparkleIcon } from "@phosphor-icons/react";
-
-// define your extension array
-// const extensions = [
-//   StarterKit,
-//   TextStyle.configure({ mergeNestedSpanStyles: true }),
-//   Color,
-//   Placeholder,
-// ];
-
-// const content = `<p data-placeholder="Bro what is going on" class="is-empty is-editor-empty"><br class="ProseMirror-trailingBreak"></p>`;
+import { useMutation } from "@tanstack/react-query";
 
 type EditorProps = {
   editor: EditorType;
@@ -34,17 +25,15 @@ const Editor = ({ editor, newHTML, oldHTML }: EditorProps) => {
     const { from } = editor.state.selection;
     const textToCursor = editor.state.doc.textBetween(0, from, "\n");
 
-    console.log("generating next line: ", textToCursor);
+    console.log("generating next line: ");
 
-    console.log(from);
-    const { top, left, right, bottom } = editor.view.coordsAtPos(from);
-    console.log(top, left);
-    setCoords({ top: bottom, left: right });
+    const { right, bottom } = editor.view.coordsAtPos(from);
+    setCoords({ top: bottom + 100, left: right + 10 });
 
-    const nextLine = await getNextLine(textToCursor); // Gets the next line
-    setData(nextLine);
+    // const nextLine = await getNextLine(textToCursor); // Gets the next line
+    nextLineMutation.mutate(textToCursor);
+    // setData(nextLine);
     editor?.commands.focus(from);
-    // editor.view.updateState(editor.view.state);
   }
 
   // function updateBubbleMenuPos() {
@@ -72,27 +61,15 @@ const Editor = ({ editor, newHTML, oldHTML }: EditorProps) => {
     setDiffOpen(true);
   }, [newHTML, oldHTML]);
 
-  // useEffect(() => {
-  //   const handleKeyDown = async (e: KeyboardEvent) => {
-  //     if (e.key == "Tab") {
-  //       e.preventDefault();
-  //       console.log("tab pressed");
-
-  //       setCanTab(false);
-  //       if (!canTab) {
-  //         return;
-  //       }
-  //       await tabComplete();
-  //       setCanTab(true);
-  //     }
-  //   };
-
-  //   document.addEventListener("keydown", handleKeyDown);
-
-  //   return () => {
-  //     document.removeEventListener("keydown", handleKeyDown);
-  //   };
-  // }, [canTab, tabComplete]);
+  const nextLineMutation = useMutation({
+    mutationFn: getNextLine,
+    onSuccess: (data) => {
+      setData(data);
+    },
+    onError: (err) => {
+      console.log(err);
+    },
+  });
 
   return (
     <>
@@ -100,10 +77,12 @@ const Editor = ({ editor, newHTML, oldHTML }: EditorProps) => {
       <EditorContent
         editor={editor}
         onKeyDown={async (e) => {
-          if (e.key == "Tab" && !data) {
+          if (e.key == "Tab" && !data && canTab) {
             console.log("Tab pressed");
             e.preventDefault();
+            setCanTab(false);
             await tabComplete();
+            setCanTab(true);
             // editor.view.dispatch(editor.state.tr);
             return;
           } else if (e.key == "Tab" && data) {

@@ -50,9 +50,9 @@ const WritingPage = () => {
 
       <PanelGroup direction="horizontal" className="">
         <Panel defaultSize={70} minSize={50}>
-          <div className="flex flex-col items-center justify-center h-screen">
+          <div className="flex flex-col items-center  h-screen">
             <EditorHeader editor={editor} />
-            <div className="max-w-3xl w-full h-screen overflow-y-auto mt-4">
+            <div className="max-w-3xl w-full h-[85vh] overflow-y-auto mt-4">
               <Editor editor={editor} newHTML={newHTML} oldHTML={oldHTML} />
             </div>
           </div>
