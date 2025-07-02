@@ -51,7 +51,7 @@ const Editor = ({ editor, newHTML, oldHTML }: EditorProps) => {
     setData("");
   }
 
-  console.count("editor rendered");
+  // console.count("editor rendered");
 
   useEffect(() => {
     console.log("got new html, should show the diff");
@@ -99,7 +99,7 @@ const Editor = ({ editor, newHTML, oldHTML }: EditorProps) => {
       />
       {/* <FloatingMenu editor={editor}>This is the floating menu</FloatingMenu> */}
 
-      {data && (
+      {data && coords && (
         <>
           <div
             // Tailwind for styling; inline style for dynamic coords

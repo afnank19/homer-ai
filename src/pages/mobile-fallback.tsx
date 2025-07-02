@@ -6,7 +6,7 @@ const MobileFallback = () => {
       <SnowflakeIcon size={"2.5rem"} color="#c96442" />
       <p className="text-xl font- text-center">
         Homer* [AI] is intended for use on a desktop.<br></br>
-        Switch to a bigger screen and comeback.
+        Switch to a bigger screen and come back.
       </p>
     </div>
   );

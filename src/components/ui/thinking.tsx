@@ -4,7 +4,7 @@ const Thinking = () => {
   return (
     <div className="flex gap-1 ml-4">
       <SnowflakeIcon size={"1.5rem"} color="#c96442" className="animate-spin" />
-      <p>Thinking</p>
+      <p className=" italic">Thinking</p>
     </div>
   );
 };

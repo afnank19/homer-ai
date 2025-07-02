@@ -11,7 +11,7 @@ const AiBubbleMenu = ({ editor }: AiBubbleMenuProps) => {
       <button
         onClick={() => {
           const { from, to } = editor.view.state.selection;
-          const text = editor.state.doc.textBetween(from, to, "");
+          // const text = editor.state.doc.textBetween(from, to, "");
           // console.log(text);
 
           const slice = editor.state.doc.slice(from, to);

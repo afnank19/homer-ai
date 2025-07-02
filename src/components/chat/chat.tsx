@@ -1,4 +1,10 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import Message from "../ui/message";
 import { callLLM } from "../../services/api/llm";
 import { PaperPlaneTiltIcon, SparkleIcon } from "@phosphor-icons/react";
@@ -21,6 +27,8 @@ const Chat = ({ editor, setNewHTML, setOldHTML }: ChatProps) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [lastestMsg, setLatestMsg] = useState<string>("");
+
+  const msgContainerRef = useRef<HTMLDivElement | null>(null);
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (input === "") {
@@ -92,13 +100,23 @@ const Chat = ({ editor, setNewHTML, setOldHTML }: ChatProps) => {
     },
   });
 
+  useEffect(() => {
+    const mRef = msgContainerRef.current;
+
+    if (!mRef) {
+      return;
+    }
+
+    mRef.scrollTop = mRef.scrollHeight;
+  }, [messages]);
+
   return (
     <div className="flex flex-col h-screen justify-end gap-1">
       <div className="w-full flex items-center gap-1 py-2 px-2 bg-[#f5f4ed]">
         <SparkleIcon size={"1.2rem"} />
         <h1 className="text-xl font-medium">Content Assistant</h1>
       </div>
-      <div className="h-full overflow-y-scroll">
+      <div className="h-full overflow-y-scroll" ref={msgContainerRef}>
         {messages.map((msg, i) => {
           return <Message key={i} message={msg.message} role={msg.role} />;
         })}
