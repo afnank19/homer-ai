@@ -6,7 +6,7 @@
 // const url = "https://openrouter.ai/api/v1/chat/completions";
 const url = "https://api.groq.com/openai/v1/chat/completions";
 
-const MODEL = "deepseek-r1-distill-llama-70b";
+const MODEL = "openai/gpt-oss-120b";
 
 export const getNextLine = async (userContext: string | undefined) => {
   const API_KEY = localStorage.getItem("api-key")
